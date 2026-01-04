@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Adventures - Snake Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #game { border: 2px solid #333; background: #90EE90; margin: 20px auto; display: block; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="memory.html">Memory Match</a></li>
+                <li><a href="tictactoe.html">Tic-Tac-Toe</a></li>
+                <li><a href="snake.html">Snake Game</a></li>
+                <li><a href="quiz.html">Animal Quiz</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="game-container">
+        <h1>Snake Game: Eat the Apples!</h1>
+        <p>Use arrow keys to move. Don't hit the walls!</p>
+        <canvas id="game" width="400" height="400"></canvas>
+        <p>Score: <span id="score">0</span></p>
+        <button id="reset">Reset Game</button>
+    </main>
+    <footer>&copy; 2026 Animal Adventures</footer>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const grid = 20;
+        let snake = [{x: 200, y: 200}];
+        let dx = grid, dy = 0;
+        let food = {x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 20) * grid};
+        let score = 0;
+        let gameOver = false;
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -grid; }
+            if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = grid; }
+            if (e.key === 'ArrowLeft' && dx === 0) { dx = -grid; dy = 0; }
+            if (e.key === 'ArrowRight' && dx === 0) { dx = grid; dy = 0; }
+        });
+
+        function draw() {
+            if (gameOver) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw snake
+            ctx.fillStyle = '#228B22';
+            snake.forEach(part => ctx.fillRect(part.x, part.y, grid, grid));
+            // Draw food
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(food.x, food.y, grid, grid);
+            // Move
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snake.some(part => part.x === head.x && part.y === head.y)) {
+                gameOver = true;
+                alert('Game Over! Score: ' + score);
+                return;
+            }
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                document.getElementById('score').textContent = score;
+                food = {x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 20) * grid};
+            } else {
+                snake.pop();
+            }
+            setTimeout(draw, 100);
+        }
+
+        document.getElementById('reset').addEventListener('click', () => {
+            snake = [{x: 200, y: 200}];
+            dx = grid; dy = 0;
+            food = {x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 20) * grid};
+            score = 0;
+            gameOver = false;
+            document.getElementById('score').textContent = 0;
+            draw();
+        });
+
+        draw();
+    </script>
+</body>
+</html>

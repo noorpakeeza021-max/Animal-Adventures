@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Adventures - Animal Quiz</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #ai-agent {
+            width: 120px;
+            height: 120px;
+            margin: 20px auto;
+            background: url('https://via.placeholder.com/120?text=Zappy+🐾') no-repeat center;
+            background-size: contain;
+            animation: bounce 2s infinite;
+        }
+        #ai-message {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff4500;
+            min-height: 30px;
+            margin: 10px 0;
+        }
+        #options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        #options button {
+            padding: 12px;
+            font-size: 1.1em;
+            background: #ffcc00;
+            border: 2px solid #ff9900;
+        }
+        #options button:hover {
+            background: #ffb300;
+        }
+        .celebration {
+            animation: celebrate 1s;
+        }
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="memory.html">Memory Match</a></li>
+                <li><a href="tictactoe.html">Tic-Tac-Toe</a></li>
+                <li><a href="snake.html">Snake Game</a></li>
+                <li><a href="quiz.html">Animal Quiz</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="game-container">
+        <h1>Animal Quiz Challenge!</h1>
+        <p>Test your animal knowledge with Zappy the Zebra!</p>
+
+        <!-- AI Agent Character -->
+        <div id="ai-agent"></div>
+        <div id="ai-message">Hi friend! Ready to play? 🦓</div>
+
+        <div id="question"></div>
+        <div id="options"></div>
+        <p id="feedback"></p>
+        <p>Score: <span id="score">0</span> / <span id="total">5</span></p>
+
+        <button id="next" style="display:none;">Next Question ➡️</button>
+        <button id="reset">New Quiz</button>
+    </main>
+    <footer>&copy; 2026 Animal Adventures</footer>
+
+    <script>
+        // Large pool of animal questions
+        const questionPool = [
+            { q: "What animal says 'roar'?", options: ["Lion", "Dog", "Cat", "Bird"], answer: "Lion" },
+            { q: "Which animal has the longest neck?", options: ["Elephant", "Giraffe", "Monkey", "Horse"], answer: "Giraffe" },
+            { q: "What colors is a panda?", options: ["Black and White", "Brown", "Orange", "Blue"], answer: "Black and White" },
+            { q: "Which animal swings from trees?", options: ["Fish", "Bird", "Monkey", "Snake"], answer: "Monkey" },
+            { q: "Which animal has black and white stripes?", options: ["Tiger", "Zebra", "Leopard", "Cow"], answer: "Zebra" },
+            { q: "What animal is known as the 'King of the Jungle'?", options: ["Elephant", "Lion", "Gorilla", "Bear"], answer: "Lion" },
+            { q: "Which animal carries its baby in a pouch?", options: ["Kangaroo", "Penguin", "Duck", "Rabbit"], answer: "Kangaroo" },
+            { q: "What animal is the tallest in the world?", options: ["Elephant", "Giraffe", "Horse", "Camel"], answer: "Giraffe" },
+            { q: "Which animal loves bananas the most?", options: ["Lion", "Monkey", "Bear", "Wolf"], answer: "Monkey" },
+            { q: "What animal has a long trunk?", options: ["Giraffe", "Elephant", "Rhino", "Hippo"], answer: "Elephant" },
+            { q: "Which bird cannot fly but is very fast?", options: ["Eagle", "Penguin", "Ostrich", "Parrot"], answer: "Ostrich" },
+            { q: "What animal changes color to hide?", options: ["Zebra", "Chameleon", "Tiger", "Panda"], answer: "Chameleon" },
+            { q: "Which animal sleeps hanging upside down?", options: ["Bat", "Koala", "Sloth", "Owl"], answer: "Bat" }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+        const scoreEl = document.getElementById('score');
+        const totalEl = document.getElementById('total');
+        const nextBtn = document.getElementById('next');
+        const resetBtn = document.getElementById('reset');
+        const aiMessage = document.getElementById('ai-message');
+        const aiAgent = document.getElementById('ai-agent');
+
+        // Generate 5 random unique questions
+        function generateNewQuestions() {
+            const shuffled = [...questionPool].sort(() => 0.5 - Math.random());
+            questions = shuffled.slice(0, 5);
+            currentQuestion = 0;
+            score = 0;
+            scoreEl.textContent = 0;
+            totalEl.textContent = questions.length;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            feedbackEl.textContent = '';
+            aiMessage.textContent = "Think carefully! 🧠";
+            const q = questions[currentQuestion];
+            questionEl.textContent = q.q;
+            optionsEl.innerHTML = '';
+
+            // Shuffle options for fairness
+            const shuffledOptions = [...q.options].sort(() => 0.5 - Math.random());
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.addEventListener('click', () => checkAnswer(opt));
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const q = questions[currentQuestion];
+            if (selected === q.answer) {
+                feedbackEl.textContent = 'Correct! 🎉';
+                feedbackEl.style.color = 'green';
+                score++;
+                scoreEl.textContent = score;
+                aiMessage.textContent = "Yay! You're awesome! 🌟";
+                aiAgent.classList.add('celebration');
+                setTimeout(() => aiAgent.classList.remove('celebration'), 1000);
+            } else {
+                feedbackEl.textContent = `Oops! The answer is ${q.answer}.`;
+                feedbackEl.style.color = 'red';
+                aiMessage.textContent = "Don't worry, try again next time! 💪";
+            }
+
+            // Disable buttons after selection
+            Array.from(optionsEl.children).forEach(btn => btn.disabled = true);
+
+            if (currentQuestion === questions.length - 1) {
+                // Quiz completed!
+                setTimeout(() => {
+                    if (score === questions.length) {
+                        aiMessage.innerHTML = "WOW! You got them ALL right! 🏆🎊<br>Generating new questions...";
+                    } else {
+                        aiMessage.innerHTML = `Great job! You scored ${score}/${questions.length}! 🦓<br>New questions coming...`;
+                    }
+                    nextBtn.textContent = "Play Again!";
+                    nextBtn.style.display = 'block';
+                }, 1500);
+            } else {
+                nextBtn.style.display = 'block';
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion === questions.length - 1) {
+                // Completed quiz → generate new set
+                generateNewQuestions();
+                nextBtn.style.display = 'none';
+            } else {
+                currentQuestion++;
+                loadQuestion();
+                nextBtn.style.display = 'none';
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            aiMessage.textContent = "Let's start fresh! 🦓";
+            generateNewQuestions();
+        });
+
+        // Start the first quiz
+        generateNewQuestions();
+        nextBtn.style.display = 'none';
+    </script>
+</body>
+</html>
